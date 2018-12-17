@@ -5,15 +5,15 @@ using System.Threading.Tasks;
 using Entities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
-namespace Auktionshus
+namespace Web
 {
     public class Startup
     {
@@ -27,7 +27,17 @@ namespace Auktionshus
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+            services.AddDbContext<IdentityDataContext>(options => options.UseInMemoryDatabase());
             services.AddDbContext<DataContext>(options => options.UseInMemoryDatabase());
+
+            services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<IdentityDataContext>();
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
@@ -40,12 +50,22 @@ namespace Auktionshus
             }
             else
             {
+                app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
+            app.UseDeveloperExceptionPage();
 
             app.UseHttpsRedirection();
-            app.UseMvc();
+            app.UseStaticFiles();
+            app.UseCookiePolicy();
+            app.UseIdentity();
 
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=AuctionItems}/{action=Index}/{id?}");
+            });
         }
     }
 }

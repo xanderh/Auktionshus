@@ -5,6 +5,10 @@ VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auktionshus", "Auktionshus\Auktionshus.csproj", "{3277A1B9-D54E-4864-8BB3-67078C3FC6FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entities", "Entities\Entities.csproj", "{FAFCAC77-E85F-422F-A13E-5E12027CC34E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Web\Web.csproj", "{29EE7E32-4F94-4721-A04C-D3DB9E3F365C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{3277A1B9-D54E-4864-8BB3-67078C3FC6FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3277A1B9-D54E-4864-8BB3-67078C3FC6FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3277A1B9-D54E-4864-8BB3-67078C3FC6FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAFCAC77-E85F-422F-A13E-5E12027CC34E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAFCAC77-E85F-422F-A13E-5E12027CC34E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAFCAC77-E85F-422F-A13E-5E12027CC34E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAFCAC77-E85F-422F-A13E-5E12027CC34E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29EE7E32-4F94-4721-A04C-D3DB9E3F365C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29EE7E32-4F94-4721-A04C-D3DB9E3F365C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29EE7E32-4F94-4721-A04C-D3DB9E3F365C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29EE7E32-4F94-4721-A04C-D3DB9E3F365C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
