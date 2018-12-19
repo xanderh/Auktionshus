@@ -28,7 +28,7 @@ namespace Auktionshus.Controllers
         }
 
         // GET: api/AuctionItems/5
-        [HttpGet("{id}")]
+        [HttpGet("{itemNumber}")]
         public async Task<IActionResult> GetAuctionItem([FromRoute] int itemNumber)
         {
             if (!ModelState.IsValid)
