@@ -7,27 +7,40 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Entities;
 using Microsoft.AspNetCore.Identity;
+using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace Web.Controllers
 {
     public class AuctionItemsController : Controller
     {
         private readonly DataContext _context;
+        private readonly HttpClient _httpClient;
+        private Uri BaseEndPoint { get; set; }
 
         public AuctionItemsController(DataContext context)
         {
+            BaseEndPoint = new Uri("https://localhost:44324/api/auctionItems");
             _context = context;
+            _httpClient = new HttpClient();
         }
 
         // GET: AuctionItems
         public async Task<IActionResult> Index()
         {
-            return View(await _context.AuctionItems.ToListAsync());
+            var response = await _httpClient.GetAsync(BaseEndPoint, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            var data = await response.Content.ReadAsStringAsync();
+            return View(JsonConvert.DeserializeObject<List<AuctionItem>>(data));
         }
 
-        public IActionResult MyBids()
+        public async Task<IActionResult> MyBids()
         {
-            return View(_context.AuctionItems.Where(item => item.User == (User.Identity as IdentityUser)).ToList());
+            var response = await _httpClient.GetAsync(BaseEndPoint, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            var data = await response.Content.ReadAsStringAsync();
+            var dataDeserialized = JsonConvert.DeserializeObject<List<AuctionItem>>(data);
+            return View(dataDeserialized.Where(item => item.User == (User.Identity as IdentityUser)).ToList());
         }
 
         // GET: AuctionItems/Details/5
@@ -38,8 +51,11 @@ namespace Web.Controllers
                 return NotFound();
             }
 
-            var auctionItem = await _context.AuctionItems
-                .FirstOrDefaultAsync(m => m.ItemNumber == id);
+            var response = await _httpClient.GetAsync(BaseEndPoint.ToString() + $"/{id}", HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            var data = await response.Content.ReadAsStringAsync();
+            var auctionItem = JsonConvert.DeserializeObject<AuctionItem>(data);
+
             if (auctionItem == null)
             {
                 return NotFound();
@@ -56,7 +72,11 @@ namespace Web.Controllers
                 return RedirectToAction("Index");
             }
 
-            var auctionItem = _context.AuctionItems.FirstOrDefault(item => item.ItemNumber == id);
+            var response = await _httpClient.GetAsync(BaseEndPoint.ToString() + $"/{id}", HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            var data = await response.Content.ReadAsStringAsync();
+            var auctionItem = JsonConvert.DeserializeObject<AuctionItem>(data);
+
             if (auctionItem == null)
             {
                 return RedirectToAction("Index");
@@ -69,9 +89,13 @@ namespace Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Bid(int id, [FromForm] AuctionItem bid)
+        public async Task<IActionResult> Bid(int id, [FromForm] AuctionItem NewAuctionItem)
         {
-            var auctionItem = _context.AuctionItems.FirstOrDefault(item => item.ItemNumber == id);
+            var response = await _httpClient.GetAsync(BaseEndPoint.ToString() + $"/{id}", HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            var data = await response.Content.ReadAsStringAsync();
+            var auctionItem = JsonConvert.DeserializeObject<AuctionItem>(data);
+
             if (auctionItem is null)
             {
                 return NotFound();
@@ -81,16 +105,14 @@ namespace Web.Controllers
             {
                 try
                 {
-                    if(bid.BidPrice <= auctionItem.BidPrice)
+                    if (NewAuctionItem.BidPrice <= auctionItem.BidPrice)
                     {
+                        ViewBag.PriceTooLow = true;
                         return View(auctionItem);
                     }
-                    auctionItem.BidPrice = bid.BidPrice;
-                    auctionItem.BidCustomName = bid.BidCustomName;
-                    auctionItem.BidCustomPhone = bid.BidCustomPhone;
-                    auctionItem.BidTimeStamp = DateTime.Now;
-                    auctionItem.User = User.Identity as IdentityUser;
-                    await _context.SaveChangesAsync();
+                    Bid bid = new Bid(auctionItem.ItemNumber, NewAuctionItem.BidPrice, NewAuctionItem.BidCustomName, NewAuctionItem.BidCustomPhone);
+                    var postResponse = _httpClient.PostAsJsonAsync<Bid>(BaseEndPoint, bid);
+                    postResponse.Result.EnsureSuccessStatusCode();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
